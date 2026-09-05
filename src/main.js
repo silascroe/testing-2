@@ -5,6 +5,21 @@ const COLS = 30;
 const ROWS = 20;
 const TILE_SIZE = canvas.width / COLS;
 const SAVE_KEY = "emberline-save-v1";
+const ASSET_SRC = {
+  hub: "./assets/command-core.webp",
+  farm: "./assets/hydroponics.webp",
+  mine: "./assets/iron-mine.webp",
+  extractor: "./assets/crystal-well.webp",
+  turret: "./assets/sentinel-turret.webp",
+};
+const ASSETS = {};
+
+Object.entries(ASSET_SRC).forEach(([assetKey, source]) => {
+  const image = new Image();
+  image.onload = () => { if (state) render(); };
+  image.src = source;
+  ASSETS[assetKey] = image;
+});
 
 const TERRAIN = {
   plains: { label: "Plains", color: "#9a936d", accent: "#c7bd8b", movement: 1 },
@@ -416,12 +431,31 @@ function drawResource(tile) {
   ctx.stroke();
 }
 
+function drawAssetOnTile(tile, image, maxWidth = 38, maxHeight = 43) {
+  if (!image?.complete || !image.naturalWidth) return false;
+  const scale = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
+  const width = image.naturalWidth * scale;
+  const height = image.naturalHeight * scale;
+  const x = tile.x * TILE_SIZE + (TILE_SIZE - width) / 2;
+  const y = tile.y * TILE_SIZE + TILE_SIZE - height + 2;
+  ctx.save();
+  ctx.fillStyle = "rgba(4, 6, 8, 0.42)";
+  ctx.beginPath();
+  ctx.ellipse(tile.x * TILE_SIZE + TILE_SIZE / 2, tile.y * TILE_SIZE + TILE_SIZE - 3, Math.min(13, width / 2), 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.drawImage(image, x, y, width, height);
+  ctx.restore();
+  return true;
+}
+
 function drawBuilding(tile) {
   if (!tile.building) return;
   const x = tile.x * TILE_SIZE;
   const y = tile.y * TILE_SIZE;
   const centerX = x + TILE_SIZE / 2;
   const centerY = y + TILE_SIZE / 2;
+
+  if (tile.building !== "wall" && tile.building !== "housing" && drawAssetOnTile(tile, ASSETS[tile.building])) return;
 
   if (tile.building === "hub") {
     ctx.fillStyle = "#0c1114";
@@ -572,7 +606,10 @@ function renderBuildList() {
     const button = document.createElement("button");
     button.className = `build-button${state.buildMode === buildingKey ? " selected" : ""}`;
     button.dataset.build = buildingKey;
-    button.innerHTML = `<strong>${building.short} / ${building.label}</strong><small>${formatCost(building.cost)}<br>${building.description}</small>`;
+    const icon = ASSET_SRC[buildingKey]
+      ? `<img class="build-icon" src="${ASSET_SRC[buildingKey]}" alt="" aria-hidden="true">`
+      : `<span class="build-icon-placeholder">${building.short[0]}</span>`;
+    button.innerHTML = `${icon}<strong>${building.short} / ${building.label}</strong><small>${formatCost(building.cost)}<br>${building.description}</small>`;
     button.disabled = state.gameOver;
     button.addEventListener("click", () => {
       state.buildMode = state.buildMode === buildingKey ? null : buildingKey;
@@ -597,7 +634,9 @@ function renderSelectedTile() {
   coords.textContent = `${String(tile.x + 1).padStart(2, "0")} : ${String(tile.y + 1).padStart(2, "0")}`;
   const building = tile.building === "hub" ? { label: "Command core", description: "The settlement’s last line of continuity." } : BUILDINGS[tile.building];
   const resource = tile.resource ? RESOURCE_LABELS[tile.resource] : "None detected";
+  const art = ASSET_SRC[tile.building] ? `<div class="selected-art"><img src="${ASSET_SRC[tile.building]}" alt="${building?.label || "Selected structure"}"></div>` : "";
   content.innerHTML = `
+    ${art}
     <strong>${building ? building.label : TERRAIN[tile.terrain].label}</strong>
     <p>${building ? building.description : `Terrain movement cost: ${TERRAIN[tile.terrain].movement}. ${tile.resource ? `${resource} signal detected.` : "No strategic resource detected."}`}</p>
     <div class="tile-stats">
