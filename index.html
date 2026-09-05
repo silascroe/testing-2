@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0e12" />
+    <title>EMBERLINE // Frontier Protocol</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="eyebrow">GITHUB-ONLY // PHASE I</span>
+          <h1>EMBERLINE</h1>
+          <p>Frontier protocol / colony simulation</p>
+        </div>
+
+        <div class="run-status" aria-live="polite">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="run-status">LIVE</span>
+          <span class="muted">/</span>
+          <span id="cycle-label">CYCLE 001</span>
+        </div>
+
+        <div class="top-actions">
+          <button class="button button-ghost" id="new-world-button">NEW WORLD</button>
+          <button class="button button-ghost" id="save-button">LOCAL SAVE</button>
+          <button class="button button-ghost" id="load-button">LOAD SAVE</button>
+        </div>
+      </header>
+
+      <main class="main-grid">
+        <section class="panel world-panel">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">FRONTIER GRID</span>
+              <h2>Hallow Basin</h2>
+            </div>
+            <div class="seed-block">
+              <span class="eyebrow">WORLD SEED</span>
+              <code id="seed-label">--------</code>
+            </div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="world-canvas" width="960" height="640" aria-label="Procedural frontier map"></canvas>
+            <div class="canvas-vignette"></div>
+            <div class="map-overlay map-overlay-top">
+              <span class="overlay-chip">SIMULATION ONLINE</span>
+              <span class="overlay-chip" id="threat-label">THREAT LOW</span>
+            </div>
+            <div class="map-overlay map-overlay-bottom">
+              <div class="legend">
+                <span><i class="legend-swatch swatch-plains"></i>plains</span>
+                <span><i class="legend-swatch swatch-forest"></i>forest</span>
+                <span><i class="legend-swatch swatch-mountain"></i>mountain</span>
+                <span><i class="legend-swatch swatch-water"></i>water</span>
+                <span><i class="legend-swatch swatch-crystal"></i>crystal</span>
+              </div>
+              <div class="speed-controls" aria-label="Simulation speed">
+                <button class="speed-button" data-speed="0">PAUSE</button>
+                <button class="speed-button active" data-speed="1">1X</button>
+                <button class="speed-button" data-speed="2">2X</button>
+                <button class="speed-button" data-speed="4">4X</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hint-bar">
+            <span class="hint-key">CLICK</span>
+            <span>select a tile</span>
+            <span class="hint-key">BUILD</span>
+            <span>choose a structure, then place it on the grid</span>
+            <span class="hint-key">SAVE</span>
+            <span>stored in this browser only</span>
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="panel telemetry-panel">
+            <div class="panel-header compact">
+              <span class="eyebrow">TELEMETRY</span>
+              <span class="mono muted" id="clock-label">00:00</span>
+            </div>
+            <div class="resource-grid">
+              <div class="resource-card resource-food">
+                <span class="resource-label">FOOD</span>
+                <strong id="food-value">000</strong>
+                <small id="food-rate">+0 / cycle</small>
+              </div>
+              <div class="resource-card resource-iron">
+                <span class="resource-label">IRON</span>
+                <strong id="iron-value">000</strong>
+                <small id="iron-rate">+0 / cycle</small>
+              </div>
+              <div class="resource-card resource-crystal">
+                <span class="resource-label">CRYSTAL</span>
+                <strong id="crystal-value">000</strong>
+                <small id="crystal-rate">+0 / cycle</small>
+              </div>
+              <div class="resource-card resource-energy">
+                <span class="resource-label">ENERGY</span>
+                <strong id="energy-value">000</strong>
+                <small id="energy-rate">+0 / cycle</small>
+              </div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-copy"><span>SETTLERS</span><strong id="population-label">0 / 0</strong></div>
+              <div class="meter"><span id="population-meter"></span></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-copy"><span>MORALE</span><strong id="morale-label">0%</strong></div>
+              <div class="meter meter-morale"><span id="morale-meter"></span></div>
+            </div>
+            <div class="meter-row">
+              <div class="meter-copy"><span>CORE INTEGRITY</span><strong id="integrity-label">0%</strong></div>
+              <div class="meter meter-integrity"><span id="integrity-meter"></span></div>
+            </div>
+          </section>
+
+          <section class="panel build-panel">
+            <div class="panel-header compact">
+              <div>
+                <span class="eyebrow">CONSTRUCTION</span>
+                <h3>Build queue</h3>
+              </div>
+              <span class="build-mode" id="build-mode-label">SELECT TILE</span>
+            </div>
+            <div class="build-list" id="build-list"></div>
+          </section>
+
+          <section class="panel selected-panel">
+            <div class="panel-header compact">
+              <span class="eyebrow">SCANNER</span>
+              <span class="mono muted" id="selected-coordinates">-- : --</span>
+            </div>
+            <div id="selected-tile-content" class="selected-tile-content">
+              <strong>No tile selected</strong>
+              <p>Click the frontier grid to inspect terrain and available resources.</p>
+            </div>
+          </section>
+
+          <section class="panel log-panel">
+            <div class="panel-header compact">
+              <span class="eyebrow">COMMAND LOG</span>
+              <span class="mono muted">LOCAL</span>
+            </div>
+            <div class="event-log" id="event-log" aria-live="polite"></div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="footer-bar">
+        <span>EMBERLINE / static systems laboratory</span>
+        <span>NO SERVER &nbsp;·&nbsp; NO DATABASE &nbsp;·&nbsp; NO EXTERNAL RUNTIME</span>
+      </footer>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
