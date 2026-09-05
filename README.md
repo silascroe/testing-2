@@ -12,6 +12,7 @@ EMBERLINE is a GitHub-only browser game: a single-player frontier colony simulat
 - Turret and wall defenses
 - Pause and simulation speed controls
 - Local browser save/load using `localStorage`
+- Generated basin key art and transparent structure sprites bundled locally
 - No external runtime services, APIs, assets, or backend
 
 ## Local development
